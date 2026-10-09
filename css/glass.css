@@ -1,0 +1,128 @@
+
+.glass {
+  position: relative;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(2.5px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 2rem;
+  box-shadow: 0 8px 32px rgba(var(--ui-accent-rgb), 0.2),
+              inset 0 4px 20px rgba(var(--ui-accent-rgb), 0.04);
+}
+#workspace-root .workspace-view :is(.source-tabs, .pgcdn-toolbar, .history-toolbar, .pg-panel-toolbar, .input-wrapper, .cg-toolbar, .cg-card, .media-tabs, .stream-controls, .vm-panel, .vm-frame-shell, .vm-status-card, .vm-note, .vm-timer, .vm-btn, .page-header-icon, .age-verify__box, .adult-gate__box) {
+  background: rgba(255, 255, 255, 0.075);
+  border-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: 0 8px 32px rgba(var(--ui-shadow-rgb), 0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+#workspace-root .workspace-view :is(.source-tabs, .pgcdn-toolbar, .history-toolbar, .pg-panel-toolbar, .cg-toolbar, .media-tabs, .stream-controls, .vm-panel, .vm-frame-shell, .age-verify__box, .adult-gate__box) {
+  position: relative;
+  overflow: hidden;
+}
+#workspace-root .workspace-view .stream-controls {
+  overflow: visible;
+  z-index: 30;
+}
+
+#workspace-root .workspace-view :is(.source-tabs, .pgcdn-toolbar, .history-toolbar, .pg-panel-toolbar, .cg-toolbar, .media-tabs, .stream-controls, .vm-panel, .vm-frame-shell, .age-verify__box, .adult-gate__box)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,.12), transparent 42%, rgba(var(--ui-accent-rgb),.06));
+  opacity: .55;
+}
+
+/* ------------------------------------------------------------------- *
+ * Stelena AI workspace                                                 *
+ * Every AI surface takes its frosted look from here. The selectors stay *
+ * at single-class specificity on purpose: workspaces.js loads ai.css    *
+ * first and glass.css last, so the AI stylesheet keeps owning layout,   *
+ * hover / active / focus states, and anything that must stay pinned     *
+ * (`.composer` is position:fixed).                                      *
+ * ------------------------------------------------------------------- */
+/* `.chat-panel` and `.ai-header` are deliberately absent: the brand row, the
+   welcome screen and the message thread sit straight on the app background
+   instead of on big glass slabs. */
+.workspace-ai :where(.ai-sidebar, .composer, .ai-new-chat, .ai-chat-item,
+  .ai-quota-pill, .persona-pill, .model-pill, .voice-pill, .model-menu, .persona-menu, .voice-menu,
+  .suggestion-card, .msg-bubble.ai, .ai-gate__card, .welcome-icon, .welcome-persona, .memory-chip,
+  .talk-minichat, .studio-modal, .studio-form, .persona-item, .memory-item, .studio-memory-head) {
+  background: rgba(255, 255, 255, 0.075);
+  border-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: 0 8px 32px rgba(var(--ui-shadow-rgb), 0.28), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Secondary AI controls: same glass, without the heavy drop shadow. */
+.workspace-ai :where(.composer__btn, .ai-clear-btn, .msg-act, .persona-menu__manage,
+  .studio-close, .studio-icon-btn, .studio-input, .studio-btn, .talk-close) {
+  background: rgba(255, 255, 255, 0.075);
+  border-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+/* Sheen overlay: only for AI panels that clip their own contents.
+   `.composer` must stay position:fixed, the sidebar and the chooser popups
+   scroll, and the chat panel is transparent, so they all keep their own
+   backgrounds only. */
+.workspace-ai :is(.studio-modal, .ai-gate__card) {
+  position: relative;
+  overflow: hidden;
+}
+.workspace-ai :is(.studio-modal, .ai-gate__card)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,.12), transparent 42%, rgba(var(--ui-accent-rgb),.06));
+  opacity: .55;
+}
+
+.glass::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 2rem;
+  backdrop-filter: blur(1px);
+  box-shadow: inset -10px -8px 0px -11px rgba(var(--ui-accent-rgb), 0.3),
+              inset 0px -9px 0px -8px rgba(var(--ui-accent-rgb), 0.3);
+  opacity: 0.2;
+  z-index: -1;
+  filter: blur(1px) drop-shadow(10px 4px 6px rgba(var(--ui-shadow-rgb),0.75)) brightness(100%);
+}
+
+.plu-ctx-menu, #bm-ctx-menu, #pgcdn-ctx-menu, .cg-ctx-menu {
+  position: fixed;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.22);
+  border-radius: 0.85rem;
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  box-shadow: 0 12px 36px rgba(var(--ui-shadow-rgb), 0.38),
+              inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.plu-ctx-menu::before, #bm-ctx-menu::before, #pgcdn-ctx-menu::before, .cg-ctx-menu::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,.14), transparent 42%, rgba(var(--ui-accent-rgb),.07));
+  opacity: .55;
+}
+
+.plu-ctx-menu::after, #bm-ctx-menu::after, #pgcdn-ctx-menu::after, .cg-ctx-menu::after {
+  content: none;
+}

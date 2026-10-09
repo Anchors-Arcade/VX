@@ -1,0 +1,110 @@
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Anchors Arcade X — aurora palette.
+     --pink* / --ui-* names are kept from the upstream token system so existing
+     rules keep working; their values are the new brand colors. */
+  --pink: #7C5CFF;
+  --pink-rgb: 124,92,255;
+  --pink-muted: #4b3a9e;
+  --pink-soft: #c9baff;
+
+  /* Brand system tokens (aurora identity). */
+  --brand-accent:        #7C5CFF;
+  --brand-accent-rgb:    124,92,255;
+  --brand-accent-2:      #28D7C5;
+  --brand-accent-2-rgb:  40,215,197;
+  --brand-aurora:        #B46CFF;
+  --brand-aurora-rgb:    180,108,255;
+  --brand-bg:            #080B18;
+  --brand-bg-2:          #10162A;
+  --brand-panel:          #151D35;
+  --brand-text:           #F4F6FF;
+  --brand-muted:          #A5AEC8;
+  --brand-grad: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-aurora) 55%, var(--brand-accent-2) 100%);
+
+  --bg: #080B18;
+  --text: #F4F6FF;
+  --muted: #A5AEC8;
+  --scrollbar-thumb: rgba(var(--pink-rgb),0.55);
+  --scrollbar-thumb-hover: rgba(var(--pink-rgb),0.85);
+  --scrollbar-track: rgba(255,255,255,0.04);
+
+  --ui-blur:         blur(20px);
+  --ui-blur-heavy:   blur(28px);
+  --ui-blur-overlay: blur(6px);
+
+  --panel-bg:      rgba(21,29,53,0.82);
+  --panel-bg-dark: rgba(16,22,42,0.92);
+  --overlay-bg:    rgba(8,11,24,0.75);
+  --surface-1:     rgba(255,255,255,0.02);
+  --surface-2:     rgba(255,255,255,0.04);
+  --surface-3:      rgba(255,255,255,0.07);
+  --surface-4:     rgba(255,255,255,0.1);
+  --border-subtle: rgba(255,255,255,0.07);
+  --border-light:  rgba(255,255,255,0.11);
+
+  --ui-danger:      #f28b82;
+  --ui-danger-rgb:  242,139,130;
+  --ui-success:     #7ec986;
+  --ui-success-rgb: 126,201,134;
+  --ui-warn:        #f5c542;
+  --ui-warn-rgb:    245,197,66;
+  --ui-star:        #f5c542;
+
+  --row-0:      #8873de; --row-0-rgb:  136,115,222;
+  --row-1:      #d873de; --row-1-rgb:  216,115,222;
+  --row-2:      #de7393; --row-2-rgb:  222,115,147;
+  --row-3:      #dea373; --row-3-rgb:  222,163,115;
+  --row-4:      #c9de73; --row-4-rgb:  201,222,115;
+  --row-5:      #78de73; --row-5-rgb:  120,222,115;
+  --row-6:      #73debd; --row-6-rgb:  115,222,189;
+  --row-7:      #73aede; --row-7-rgb:  115,174,222;
+
+  --ui-accent-rgb: 124,92,255;
+  --ui-shadow-rgb: 22,17,46;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  line-height: 1.6;
+}

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Anchors Arcade X — original anchor mark. Gradient glyph matching the PNG icon set. -->
+  <defs>
+    <linearGradient id="aaxGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7C5CFF"/>
+      <stop offset="1" stop-color="#28D7C5"/>
+    </linearGradient>
+    <filter id="aaxGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <g id="aaxAnchor" fill="none" stroke="url(#aaxGrad)" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="256" cy="104" r="44" stroke-width="36"/>
+      <path d="M256 140 V 418" stroke-width="44"/>
+      <path d="M136 252 H 376" stroke-width="44"/>
+      <path d="M138 252 C 70 280, 78 380, 250 418" stroke-width="44"/>
+      <path d="M374 252 C 442 280, 434 380, 262 418" stroke-width="44"/>
+    </g>
+  </defs>
+  <use href="#aaxAnchor" filter="url(#aaxGlow)" opacity="0.6"/>
+  <use href="#aaxAnchor"/>
+</svg>
