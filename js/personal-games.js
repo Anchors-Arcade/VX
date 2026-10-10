@@ -105,7 +105,9 @@
   }
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(err => {
+    // Registered relative to the page so the scope follows the deployment
+    // directory (user.github.io/repo/) instead of assuming the domain root.
+    navigator.serviceWorker.register('sw.js', { scope: './' }).catch(err => {
       console.warn('[personal-games] SW registration failed:', err);
     });
   }

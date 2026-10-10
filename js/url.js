@@ -41,7 +41,12 @@ function resolvePluUrl(input) {
 function getDisplayUrl(rawUrl) {
   try {
     const absolute = new URL(rawUrl, window.location.origin)
-    const entry = Object.entries(LOCAL_PAGES).find(([, path]) => absolute.pathname === '/' + path)
+    // Local pages can be addressed from the domain root or from the app's
+    // own directory when it is deployed under a subpath.
+    const appDir = new URL('./', window.location.href).pathname
+    const entry = Object.entries(LOCAL_PAGES).find(
+      ([, path]) => absolute.pathname === '/' + path || absolute.pathname === appDir + path
+    )
     if (entry) return `pluto://${entry[0]}${absolute.search}${absolute.hash}`
   } catch (e) {}
   return rawUrl

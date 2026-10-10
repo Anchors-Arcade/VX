@@ -1,5 +1,37 @@
 const RELAY_QUERY_OVERRIDE = new URLSearchParams(window.location.search).get('relay')
 
+// The app can be deployed at a domain root or under a subpath
+// (user.github.io/repo/), so engine endpoints are resolved from this script's
+// own URL instead of being hard-coded from the origin. Every page that loads
+// net.js lives in the app root, and js/ always sits one level below it, so
+// '../' is the app root in every deployment.
+const APP_ROOT = (document.currentScript && document.currentScript.src)
+  ? new URL('../', document.currentScript.src).href
+  : new URL('./', location.href).href
+
+// Full URLs for what is registered, fetched or imported directly: service
+// worker scripts and scopes, workers, and dynamic imports inside them.
+function appUrl(path) {
+  return new URL(path, APP_ROOT).href
+}
+
+// Origin-absolute paths for engine configs that are compared against URL
+// pathnames or joined onto the origin (Scramjet's prefix and its file paths).
+function appPath(path) {
+  return new URL(path, APP_ROOT).pathname
+}
+
+// Bare-mux keeps retrying its worker ping without ever settling when the
+// worker never came up (404 script, blocked host). Everything the bridge
+// awaits goes through here so a dead worker costs one bounded wait instead
+// of hanging initNetStack() — and with it every navigate() — forever.
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(label)), ms))
+  ])
+}
+
 // Wisp relay infrastructure. Each region is served from its own host, so the
 // list below is the only place that decides where proxied browsing traffic
 // goes: adding a region is a row here plus a matching `wisp-<id>` host. The
@@ -835,7 +867,11 @@ function loadNetMode() {
   if (stored) return stored
   const legacy = localStorage.getItem(LEGACY_NET_MODE_KEY)
   if (legacy) return LEGACY_NET_MODE_MAP[legacy] || legacy
-  return 'core'
+  // VanilliaPXY is the default because it is the one engine that needs no
+  // local service worker, relay or bridge — it works wherever the app itself
+  // is reachable, including subpath deploys (user.github.io/repo/) where
+  // origin-root service-worker scopes cannot be registered.
+  return 'vanillia'
 }
 
 let selectedNet  = loadNetMode()
@@ -909,7 +945,7 @@ async function initCore() {
   if (typeof __uv$config === 'undefined') return false
 
   try {
-    await navigator.serviceWorker.register('/core/sw.js', { scope: '/core/' })
+    await navigator.serviceWorker.register(appUrl('core/sw.js'), { scope: appUrl('core/') })
     coreReady = true
     return true
   } catch (e) {
@@ -924,7 +960,7 @@ async function initRuntime() {
   if (!('serviceWorker' in navigator)) return false
 
   try {
-    await navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    await navigator.serviceWorker.register(appUrl('sw.js'), { scope: APP_ROOT })
 
     await new Promise(resolve => {
       const req = indexedDB.open('$scramjet')
@@ -943,8 +979,8 @@ async function initRuntime() {
 
     const { ScramjetController } = $scramjetLoadController()
     runtimeController = new ScramjetController({
-      prefix: '/runtime/service/',
-      files: { wasm: '/runtime/engine.wasm', all: '/runtime/all.js', sync: '/runtime/sync.js' },
+      prefix: appPath('runtime/service/'),
+      files: { wasm: appPath('runtime/engine.wasm'), all: appPath('runtime/all.js'), sync: appPath('runtime/sync.js') },
     })
     await runtimeController.init()
     runtimeReady = true
@@ -969,10 +1005,18 @@ async function initBridge() {
 
     try {
       const relayUrl = await getRelayUrl()
-      bridgeConnection = new BareMux.BareMuxConnection('/bridge/worker.js')
-      await bridgeConnection.setTransport('/mesh/index.mjs', [{ wisp: relayUrl }])
+      bridgeConnection = new BareMux.BareMuxConnection(appUrl('bridge/worker.js'))
+      await withTimeout(
+        bridgeConnection.setTransport(appUrl('mesh/index.mjs'), [{ wisp: relayUrl }]),
+        RELAY_CONNECT_TIMEOUT_MS,
+        'bridge transport init timed out'
+      )
       if (generation !== netTransportGeneration) return false
-      bridgeReady = !!(await bridgeConnection.getTransport())
+      bridgeReady = !!(await withTimeout(
+        bridgeConnection.getTransport(),
+        RELAY_CONNECT_TIMEOUT_MS,
+        'bridge transport check timed out'
+      ))
       if (!bridgeReady) setRelayStatus('err')
       return bridgeReady
     } catch (e) {

@@ -12,7 +12,10 @@
           );
 
     self.__uv$config = {
-        prefix: "/core/service/",
+        // `loc` keeps the service prefix inside the deployment directory when
+        // the app is served from a subpath (user.github.io/repo/), where an
+        // origin-root path would fall outside the registered worker's scope.
+        prefix: loc + uvPfx + "service/",
         encodeUrl: Ultraviolet.codec.xor.encode,
         decodeUrl: Ultraviolet.codec.xor.decode,
         handler: loc + uvPfx + "handler.js",
