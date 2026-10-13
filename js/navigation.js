@@ -178,7 +178,7 @@ async function openHistoryEntry(tabEl, index) {
     await activateRemoteTab(url, tabEl)
     return
   }
-  if (!coreReady || !bridgeReady) await initNetStack()
+  await initNetStack()
   if (window.Workspaces) Workspaces.deactivate()
   if (pageFrame) pageFrame.style.display = 'none'
 
@@ -214,7 +214,7 @@ function recordProxyVisit(kind, title, href, engine) {
 }
 
 async function navigate(url) {
-  if (!coreReady || !bridgeReady) await initNetStack()
+  await initNetStack()
   let full = (url || '').trim()
   if (!full) return
   if (window.SoundFX) window.SoundFX.play('launch')
@@ -252,7 +252,7 @@ async function navigate(url) {
   let searchQuery = null
   if (!/^https?:\/\//i.test(full) && !full.startsWith('about:')) {
     if (full.includes('.') && !full.includes(' ')) full = 'https://' + full
-    else { searchQuery = full; full = 'https://www.duckduckgo.com/search?q=' + encodeURIComponent(full) }
+    else { searchQuery = full; full = 'https://search.brave.com/search?q=' + encodeURIComponent(full) }
   }
   if (!full.startsWith('about:')) {
     recordProxyVisit(searchQuery ? 'search' : 'web', searchQuery || full, full, typeof getNetEngine === 'function' ? getNetEngine() : 'core')
