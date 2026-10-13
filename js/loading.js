@@ -14,6 +14,36 @@
   const CLOUD_CACHE_KEY = 'plutonium-cloud-v1';
   const LOGOS_CACHE_KEY = 'plutonium-logos-v3';
   const PGCDN_BASE = 'https://g.cdn.plutoniumnet.work';
+  // Once a boot-cache run finishes, later visits skip it entirely. The flag
+  // names the set of cached lists: bump the version when BG_IMAGES,
+  // LOGO_IMAGES or the cloud/game image sources change so everyone re-runs
+  // the pre-warm once. Images fetched later at runtime are still cached by
+  // the service worker as the app views them.
+  const BOOT_CACHE_FLAG = 'plu_bootcache_v1';
+
+  function bootCacheDone() {
+    try { return localStorage.getItem(BOOT_CACHE_FLAG) === '1'; } catch (_) { return false; }
+  }
+
+  function markBootCacheDone() {
+    try { localStorage.setItem(BOOT_CACHE_FLAG, '1'); } catch (_) {}
+  }
+
+  // The flag is only trusted while the pre-warm caches still exist — if the
+  // browser evicted them (quota pressure, manual cleanup) the run is repeated
+  // once. This check is purely local: no network is touched.
+  async function bootCachesIntact() {
+    if (!('caches' in window)) return false;
+    try {
+      var present = await Promise.all([
+        caches.has(CACHE_KEY),
+        caches.has(LOGOS_CACHE_KEY)
+      ]);
+      return present.every(Boolean);
+    } catch (_) {
+      return false;
+    }
+  }
   const BG_IMAGES = [
     'img/backgrounds/coast.jpg',
     'img/backgrounds/color-burst.jpg',
@@ -208,7 +238,13 @@
 
   async function contentLength(url) {
     try {
-      var resp = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+      var opts = { method: 'HEAD', cache: 'no-store' };
+      // A host that never answers must not freeze the measuring stage; cap
+      // each probe so the boot run always makes progress.
+      if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) {
+        opts.signal = AbortSignal.timeout(8000);
+      }
+      var resp = await fetch(url, opts);
       if (!resp.ok) return 0;
       return parseInt(resp.headers.get('content-length') || '0', 10) || 0;
     } catch (_) {
@@ -348,7 +384,12 @@
   async function cacheGameImages() {
     if (!('caches' in window)) return;
     try {
-      var cres = await fetch(PGCDN_BASE + '/config.json', { cache: 'no-store' });
+      var cres = await fetch(PGCDN_BASE + '/config.json', {
+        cache: 'no-store',
+        signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout)
+          ? AbortSignal.timeout(8000)
+          : undefined
+      });
       if (!cres.ok) return;
       var cfg = await cres.json();
       var allGames = (cfg.games || []).filter(function (g) { return g.image; });
@@ -444,10 +485,17 @@
 
   async function cacheVisibleAssets() {
     try {
+      // The pre-warm is a first-visit job: once it has run to completion the
+      // flag plus the still-present caches are enough, and every later visit
+      // skips straight past it — no HEAD probes, no CDN config fetches, no
+      // re-measuring lists that can never fully cache. New content viewed
+      // later is still cached on demand by the service worker.
+      if (bootCacheDone() && (await bootCachesIntact())) return;
       await cacheBackgroundImages();
       await cacheLogoImages();
       await cacheGameImages();
       await cacheCloudImages();
+      markBootCacheDone();
     } finally {
       cacheComplete = true;
       checkAndHide();
